@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import useSelectCoin from "../hooks/useSelectCoin"
 import { coins } from "../data/coins"
+import Swal from "sweetalert2"
 import styled from "@emotion/styled"
 
 const SubmitBtn = styled.input`
@@ -47,8 +48,23 @@ const Form = () => {
         queryApi()
     }, [])
 
+    const handleSubmit = e => {
+        e.preventDefault()
+
+        if([coin, crypto].includes('')) {
+            return Swal.fire({
+                icon: 'error',
+                title:'Todos los campos son obligatorios',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    }
+
     return (
-        <form>
+        <form
+            onSubmit={handleSubmit}
+        >
             <SelectCoins />
             <SelectCryptos />
 
