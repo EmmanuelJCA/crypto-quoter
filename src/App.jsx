@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
+
 import Form from "./components/Form"
 import Quotation from "./components/Quotation"
 import Spinner from "./components/spinner"
+
+import Swal from "sweetalert2"
 import styled from "@emotion/styled"
 import CryptoImage from './assets/crypto-image.png'
-import Swal from "sweetalert2"
 
 const Container = styled.div`
   max-width: 900px;
@@ -89,7 +91,7 @@ function App() {
             icon: 'error',
             title: 'Error de conexion, intente de nuevo mas tarde',
             showConfirmButton: false,
-            timer: 1500
+            timer: 1500,
           })
         }
       
