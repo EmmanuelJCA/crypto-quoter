@@ -17,6 +17,7 @@ const Container = styled.div`
 const Image = styled.img`
     width: 150px;
     display: block;
+    margin-top: 10px;
 `
 
 const Text = styled.p`

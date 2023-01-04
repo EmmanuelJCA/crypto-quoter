@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 import Form from "./components/Form"
 import Quotation from "./components/Quotation"
-import Spinner from "./components/spinner"
+import Spinner from "./components/Spinner"
 
 import Swal from "sweetalert2"
 import styled from "@emotion/styled"
