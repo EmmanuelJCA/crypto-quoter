@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
 import Form from "./components/Form"
+import Quotation from "./components/Quotation"
+import Spinner from "./components/spinner"
 import styled from "@emotion/styled"
 import CryptoImage from './assets/crypto-image.png'
+import Swal from "sweetalert2"
 
 const Container = styled.div`
   max-width: 900px;
@@ -17,8 +20,11 @@ const Container = styled.div`
 const Image = styled.img`
   max-width: 400px;
   width: 80%;
-  margin: 100px auto 0 auto;
+  margin: 10px auto 0 auto;
   display: block;
+  @media (min-width: 992px) {
+    margin: 100px auto 0 auto;
+  }
 `
 
 const Heading = styled.h1`
@@ -26,9 +32,13 @@ const Heading = styled.h1`
   color: #FFF;
   text-align: center;
   font-weight: 700;
-  margin-top: 80px;
-  margin-bottom: 80px;
+  margin-top: 16px;
+  margin-bottom: 16px;
   font-size: 34px;
+  @media (min-width: 992px) {
+    margin-top: 80px;
+    margin-bottom: 80px;
+  }
 
   &::after {
     content: '';
@@ -44,17 +54,46 @@ function App() {
 
   const [coins, setCoins] = useState({})
   const [quotation, setQuotation] = useState({})
+  const [binanceQuotation, setBinanceQuotation] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+
     if(Object.keys(coins).length > 0) {
+
       const { coin, crypto } = coins
+
       const quoteCrypto = async () => {
-        const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${crypto}&tsyms=${coin}`
+        setLoading(true)
+        setQuotation({})
+        setBinanceQuotation({})
 
-        const response = await fetch(url)
-        const result = await response.json()
+        const cryptoCompareUrl = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${crypto}&tsyms=${coin}`
+        const cryptoYaUrl = `https://criptoya.com/api/binancep2p/${crypto}/${coin}/1`
 
-        setQuotation(result.DISPLAY[crypto][coin])
+        const [cryptoCompare, cryptoYa] = await Promise.allSettled([fetch(cryptoCompareUrl), fetch(cryptoYaUrl)])
+        
+        if(cryptoCompare.status === 'fulfilled') {
+          const cryptoCompareResponse = cryptoCompare.value
+          const cryptoCompareQuotation = await cryptoCompareResponse.json()
+          setQuotation(cryptoCompareQuotation.DISPLAY[crypto][coin])
+        }
+        if(cryptoYa.status === 'fulfilled') {
+          const cryptoYaResponse =  cryptoYa.value
+          const cryptoYaQuotation = await cryptoYaResponse.json()
+          setBinanceQuotation(cryptoYaQuotation.asks.data)
+        }
+
+        if(cryptoCompare.status === 'rejected' && cryptoYa.status === 'rejected') {
+          return Swal.fire({
+            icon: 'error',
+            title: 'Error de conexion, intente de nuevo mas tarde',
+            showConfirmButton: false,
+            timer: 1500
+          })
+        }
+      
+        setLoading(false)
       }
 
       quoteCrypto()
@@ -72,6 +111,8 @@ function App() {
         <Form
           setCoins={setCoins} 
         />
+        {loading && <Spinner />}
+        {quotation.PRICE && <Quotation quotation={quotation} binanceQuotation={binanceQuotation}/>}
       </div>
     </Container>
   )
